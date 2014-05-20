@@ -1,0 +1,5 @@
+# test_parser extension
+comment = 'Jieba parser for full-text search'
+default_version = '1.0'
+module_pathname = '$libdir/jieba_parser'
+relocatable = true
