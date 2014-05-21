@@ -1,0 +1,53 @@
+CREATE EXTENSION jieba_parser;
+-- make test configuration using parser
+CREATE TEXT SEARCH CONFIGURATION jiebacfg (PARSER = jiebaparser);
+ALTER TEXT SEARCH CONFIGURATION jiebacfg ADD MAPPING FOR word WITH simple;
+-- ts_parse
+SELECT * FROM ts_parse('jiebaparser', '小明硕士毕业于中国科学院计算所，后在日本京都大学深造');
+ tokid |    token     
+-------+--------------
+     3 | 小明
+     3 | 硕士
+     3 | 毕业
+     3 | 于
+     3 | 中国
+     3 | 科学
+     3 | 学院
+     3 | 科学院
+     3 | 中国科学院
+     3 | 计算
+     3 | 计算所
+     3 | ，
+     3 | 后
+     3 | 在
+     3 | 日本
+     3 | 京都
+     3 | 大学
+     3 | 日本京都大学
+     3 | 深造
+(19 rows)
+
+SELECT to_tsvector('jiebacfg','我来到北京清华大学');
+                           to_tsvector                            
+------------------------------------------------------------------
+ '北京':3 '华大':5 '大学':6 '我':1 '来到':2 '清华':4 '清华大学':7
+(1 row)
+
+SELECT to_tsquery('jiebacfg', '清华');
+ to_tsquery 
+------------
+ '清华'
+(1 row)
+
+SELECT to_tsvector('jiebacfg', '我来到北京清华大学') @@ to_tsquery('jiebacfg', '清华');
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT jieba_extract_tags('被称为“相声演员”的罗永浩，依然以调侃开场：先调侃了一下延迟开始所造成的“经济损失”，紧接着矛头直接指向眼下手机市场上的硬件大战，以及“跑分大战”；看上去，小米和雷军再次躺枪。', 5);
+      jieba_extract_tags      
+------------------------------
+ {调侃,大战,雷军,罗永浩,相声}
+(1 row)
+
